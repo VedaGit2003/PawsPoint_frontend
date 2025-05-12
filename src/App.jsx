@@ -31,6 +31,8 @@ import Buypets from './components/pets/Buypets';
 import CategoryPets from './components/pets/CategoryPets';
 import MyPetOrders from './components/pets/MyPetOrders';
 import PetOrder from './components/pages/protected/PetOrder';
+import OfflineAppointments from './components/pages/protected/OfflineAppointments';
+import UpdateOfflineAppointments from './components/pages/protected/updateOfflineAppointments';
 
 function App() {
   const [cookies] = useCookies(['token']);
@@ -59,7 +61,8 @@ function App() {
             <Route path='/vet-appointment-online-update/:appointmentId' element={<AppointmentAcceptByVet />} />
             <Route path='/vet-videocall/:appointmentId' element={<VetVideoCall />} />
 
-
+             <Route path='/allOfflineAppointments' element={<OfflineAppointments />} />
+             <Route path='/updateOfflineAppointments/:appointmentId' element={<UpdateOfflineAppointments />} />
              
             <Route path='services/buy-pets' element={<Buypets/>} />
             <Route path='services/buy-pets/:pet_Type' element={<CategoryPets/>} />

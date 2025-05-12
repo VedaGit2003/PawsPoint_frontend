@@ -97,7 +97,9 @@ Pet Order Details
                   Order Update
                 </button>
 
-                <button className="px-6 py-3 rounded-full bg-white text-emerald-600 font-semibold uppercase hover:bg-emerald-100 shadow-md">
+                <button className="px-6 py-3 rounded-full bg-white text-emerald-600 font-semibold uppercase hover:bg-emerald-100 shadow-md"
+                onClick={()=>navigate('/allOfflineAppointments')}
+                >
                   Set Appointments
                 </button>
               </>

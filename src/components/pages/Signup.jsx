@@ -13,6 +13,7 @@ const Signup = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false);
 
   //cookie set up
   const [cookies, setCookie] = useCookies(['token']);
@@ -28,55 +29,103 @@ const Signup = () => {
   }
 
   //handle signup
+  // const signup = async () => {
+  //   try {
+  //     if (password !== confirmPassword) {
+  //       toast.warning('Password and confirm password do not match');
+  //       return; // Stop further execution
+  //     }
+  
+  //     const user_Role = 'consumer';
+  //     const data = {
+  //       user_Name: name,
+  //       email: email,
+  //       password: password,
+  //       user_Role: user_Role,
+  //     };
+  
+  //     const response = await axios.post(backend_url + '/api/v1/users/auth/sign-up', data);
+  
+  //     if (response && response?.data?.statusCode === 201) {
+  //       const token = response?.data?.data?.token;
+  //       const date = new Date();
+  //       date.setDate(date.getDate() + 30);
+  //  setCookie('token', token, { path: '/', expires: date });
+  
+  //       toast.success('User created successfully');
+  
+  //       // Set the user data in localStorage
+  //       const userData = response.data.data.user;
+  // localStorage.setItem('user', JSON.stringify(userData));
+  
+  //       // Setting the auth data in context
+  //       await setAuth({
+  //         user: userData,
+  //         token,
+  //       });
+  
+  //       navigate('/'); // Navigate to the home page
+  //       return; // Explicitly stop further execution
+  //     }
+  
+  //     // Handle server-side errors
+  //     toast.error(response?.data?.errors || 'An error occurred during signup');
+  //     return; // Stop further execution
+  //   } catch (error) {
+  //     // Handle any network or unexpected errors
+  //     toast.error('Failed to register. Please try again later.');
+  //     console.error('Sign-up error:', error);
+  //     return; // Explicitly stop further execution
+  //   }
+  // };
+
   const signup = async () => {
-    try {
-      if (password !== confirmPassword) {
-        toast.warning('Password and confirm password do not match');
-        return; // Stop further execution
-      }
-  
-      const user_Role = 'consumer';
-      const data = {
-        user_Name: name,
-        email: email,
-        password: password,
-        user_Role: user_Role,
-      };
-  
-      const response = await axios.post(backend_url + '/api/v1/users/auth/sign-up', data);
-  
-      if (response && response?.data?.statusCode === 201) {
-        const token = response?.data?.data?.token;
-        const date = new Date();
-        date.setDate(date.getDate() + 30);
-   setCookie('token', token, { path: '/', expires: date });
-  
-        toast.success('User created successfully');
-  
-        // Set the user data in localStorage
-        const userData = response.data.data.user;
-  localStorage.setItem('user', JSON.stringify(userData));
-  
-        // Setting the auth data in context
-        await setAuth({
-          user: userData,
-          token,
-        });
-  
-        navigate('/'); // Navigate to the home page
-        return; // Explicitly stop further execution
-      }
-  
-      // Handle server-side errors
-      toast.error(response?.data?.errors || 'An error occurred during signup');
-      return; // Stop further execution
-    } catch (error) {
-      // Handle any network or unexpected errors
-      toast.error('Failed to register. Please try again later.');
-      console.error('Sign-up error:', error);
-      return; // Explicitly stop further execution
+  try {
+    setLoading(true); // ✅ Show loading spinner
+
+    if (password !== confirmPassword) {
+      toast.warning('Password and confirm password do not match');
+      setLoading(false); // ✅ Reset loading
+      return;
     }
-  };
+
+    const user_Role = 'consumer';
+    const data = {
+      user_Name: name,
+      email: email,
+      password: password,
+      user_Role,
+    };
+
+    const response = await axios.post(backend_url + '/api/v1/users/auth/sign-up', data);
+
+    if (response && response?.data?.statusCode === 201) {
+      const token = response?.data?.data?.token;
+      const date = new Date();
+      date.setDate(date.getDate() + 30);
+      setCookie('token', token, { path: '/', expires: date });
+
+      toast.success('User created successfully');
+
+      const userData = response.data.data.user;
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      await setAuth({
+        user: userData,
+        token,
+      });
+
+      navigate('/');
+    } else {
+      toast.error(response?.data?.errors || 'An error occurred during signup');
+    }
+  } catch (error) {
+    toast.error('Failed to register. Please try again later.');
+    console.error('Sign-up error:', error);
+  } finally {
+    setLoading(false); // ✅ Always stop loading
+  }
+};
   
 
 
@@ -134,7 +183,7 @@ const Signup = () => {
 
         <div className="flex items-center justify-center ">
           <div className="relative group">
-            <button className="relative inline-block p-px font-semibold leading-6 text-white bg-gray-800 shadow-2xl cursor-pointer rounded-xl shadow-zinc-900 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
+            {/* <button className="relative inline-block p-px font-semibold leading-6 text-white bg-gray-800 shadow-2xl cursor-pointer rounded-xl shadow-zinc-900 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
               onClick={(e) => {
                 e.preventDefault()
                 signup()
@@ -149,7 +198,46 @@ const Signup = () => {
                   </svg>
                 </div>
               </span>
-            </button>
+            </button> */}
+            <button
+  className="relative inline-block p-px font-semibold leading-6 text-white bg-gray-800 shadow-2xl cursor-pointer rounded-xl shadow-zinc-900 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 disabled:opacity-50"
+  onClick={(e) => {
+    e.preventDefault();
+    signup();
+  }}
+  disabled={loading} // ✅ Disable button while loading
+>
+  <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 p-[2px] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+  <span className="relative z-10 block px-6 py-3 rounded-xl bg-gray-950">
+    <div className="relative z-10 flex items-center space-x-2">
+      {loading ? (
+        // ✅ Loading animation
+        <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+      ) : (
+        <>
+          <span className="transition-all duration-500 group-hover:translate-x-1">Let's get started</span>
+          <svg className="w-6 h-6 transition-transform duration-500 group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20">
+            <path clipRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" fillRule="evenodd" />
+          </svg>
+        </>
+      )}
+    </div>
+  </span>
+</button>
           </div>
         </div>
 

@@ -9,6 +9,8 @@ import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
 const [auth,setAuth]=useAuth()
+const [loading, setLoading] = useState(false);
+
 
   const [theme, setTheme] = useState('light')
   const [email, setEmail] = useState('')
@@ -29,52 +31,87 @@ const [auth,setAuth]=useAuth()
   }
 
   //handle login
+  // const login = async () => {
+  //   try {
+  //     //preparing data
+  //     const data = {
+  //       email: email,
+  //       password: password,
+  //     }
+  //     const response = await axios.post(backend_url + '/api/v1/users/login', data,
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       }
+  //     )
+  //     if (response && response?.data?.statusCode === 200) {
+  //       const token = response?.data?.data?.token
+  //       const date = new Date()
+  //       date.setDate(date.getDate() + 30)
+
+  //       //set the token in cookie storage
+  //       setCookie('token', token, { path: '/', expires: date })
+
+  //       //set the user data in localstorage
+  //       const userData=response.data.data.user
+  //       localStorage.setItem('user',JSON.stringify(userData))
+  //       //setting the auth data in context
+  //      setAuth({
+  //       user:userData,
+  //       token
+  //      })
+  //       console.log(response.data)
+  //       // console.log(token,response?.data?.data?.token)
+  //       toast.success('Login successfull')
+  //       navigate('/')
+  //     }
+  //     else {
+  //       // alert(response?.data?.errors)
+  //       toast.error(response?.data?.errors)
+  //       navigate('/login')
+  //     }
+  //   } catch (error) {
+  //     //   alert('Failed to register. Please try again later.');
+  //     //   console.error('Sign-in error:', error);
+  //     toast.error("login error",error)
+  //   }
+  // }
   const login = async () => {
-    try {
-      //preparing data
-      const data = {
-        email: email,
-        password: password,
-      }
-      const response = await axios.post(backend_url + '/api/v1/users/login', data,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-      if (response && response?.data?.statusCode === 200) {
-        const token = response?.data?.data?.token
-        const date = new Date()
-        date.setDate(date.getDate() + 30)
-
-        //set the token in cookie storage
-        setCookie('token', token, { path: '/', expires: date })
-
-        //set the user data in localstorage
-        const userData=response.data.data.user
-        localStorage.setItem('user',JSON.stringify(userData))
-        //setting the auth data in context
-       setAuth({
-        user:userData,
-        token
-       })
-        console.log(response.data)
-        // console.log(token,response?.data?.data?.token)
-        toast.success('Login successfull')
-        navigate('/')
-      }
-      else {
-        // alert(response?.data?.errors)
-        toast.error(response?.data?.errors)
-        navigate('/login')
-      }
-    } catch (error) {
-      //   alert('Failed to register. Please try again later.');
-      //   console.error('Sign-in error:', error);
-      toast.error("login error",error)
-    }
+  if (!email || !password) {
+    toast.warning("Please fill in both email and password fields.");
+    return;
   }
+
+  setLoading(true);
+  try {
+    const data = { email, password };
+    const response = await axios.post(`${backend_url}/api/v1/users/login`, data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response?.data?.statusCode === 200) {
+      const token = response.data.data.token;
+      const userData = response.data.data.user;
+      const date = new Date();
+      date.setDate(date.getDate() + 30);
+
+      setCookie('token', token, { path: '/', expires: date });
+      localStorage.setItem('user', JSON.stringify(userData));
+      setAuth({ user: userData, token });
+
+      toast.success('Login successful');
+      navigate('/');
+    } else {
+      toast.error(response?.data?.errors || "Login failed");
+    }
+  } catch (error) {
+    toast.error(`Login error: ${error?.response?.data?.message || error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
   return (
@@ -124,14 +161,35 @@ const [auth,setAuth]=useAuth()
         </div>
         {/* Sign In button */}
 
-        <button class="w-40 h-12 bg-white cursor-pointer rounded-3xl border-2 border-[#32c02bdf] shadow-[inset_0px_-2px_0px_1px_#9748FF] group hover:bg-[#32c02bdf] transition duration-300 ease-in-out"
+        {/* <button class="w-40 h-12 bg-white cursor-pointer rounded-3xl border-2 border-[#32c02bdf] shadow-[inset_0px_-2px_0px_1px_#9748FF] group hover:bg-[#32c02bdf] transition duration-300 ease-in-out"
           onClick={(e) => {
             e.preventDefault()
             login()
           }}
         >
           <span class="font-medium text-[#333] group-hover:text-white">Sign In</span>
-        </button>
+        </button> */}
+        <button
+  className="w-40 h-12 bg-white cursor-pointer rounded-3xl border-2 border-[#32c02bdf] shadow-[inset_0px_-2px_0px_1px_#9748FF] group hover:bg-[#32c02bdf] transition duration-300 ease-in-out"
+  onClick={(e) => {
+    e.preventDefault();
+    login();
+  }}
+  disabled={loading}
+>
+  {loading ? (
+    <div className="flex justify-center items-center">
+      <svg className="animate-spin h-5 w-5 text-[#32c02bdf]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 01-8 8z" />
+      </svg>
+      <span className="ml-2 text-[#333] group-hover:text-white">Signing In...</span>
+    </div>
+  ) : (
+    <span className="font-medium text-[#333] group-hover:text-white">Sign In</span>
+  )}
+</button>
+
 
 
         {/* google sign up button */}
