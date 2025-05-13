@@ -18,12 +18,12 @@ const priceRanges = [
 
 // Categories
 const categories = [
-  "Pet Food & Treats",
-  "Pet Accessories",
+  "Food",
+  "Accessories",
   "Toys",
-  "Pet Grooming & Hygiene",
-  "Pet Health & Wellness",
-  "Pet Housing & Enclosures",
+  "Cages",
+  "Pharma",
+  "Aquariums",
 ];
 
 const Shop = () => {
